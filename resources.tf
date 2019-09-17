@@ -1,3 +1,18 @@
+provider "aws" {
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
+  region     = "us-west-1"
+}
+
+data "aws_availability_zones" "available" {}
+
+module "vpc" {
+  source = "./Modules/VPC"
+  name = "${var.environment_tag}"
+  cidr = "${var.network_address_space}"
+  azs = "${slice(data.aws_availability_zones.available.names,0,var.subnet_count)}"
+}
+
 data "aws_ami" "windows" {
   most_recent = true
 
