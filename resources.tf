@@ -34,13 +34,14 @@ resource "aws_launch_configuration" "web-svr-launch" {
   image_id      = "${data.aws_ami.windows.id}"
   instance_type = "t2.micro"
   placement_tenancy = "default"
+  
 
   lifecycle {
     create_before_destroy = true
   }
 }
 
-resource "aws_autoscaling_group" "bar" {
+resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
   launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
   min_size             = 1
@@ -49,4 +50,12 @@ resource "aws_autoscaling_group" "bar" {
   lifecycle {
     create_before_destroy = true
   }
+}
+# Was looking a deep dive terraform folder 6 and need to finish this configuration
+resource "aws_instance" "bastion" {
+  ami = "${data.aws_ami.windows.id}"
+  instance_type = "t2.micro"
+  subnet_id = "${element(aws_subnet.public.*.subnet_id,0)}"
+  associate_public_ip_address = true
+
 }
