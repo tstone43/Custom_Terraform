@@ -35,18 +35,19 @@ resource "aws_launch_configuration" "web-svr-launch" {
   instance_type = "t2.micro"
   placement_tenancy = "default"
   key_name = "${var.key_name}"
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   lifecycle {
     create_before_destroy = true
   }
 }
-# reference is https://www.terraform.io/docs/providers/aws/r/lb.html and obviously not complete
+# reference is https://medium.com/cognitoiq/terraform-and-aws-application-load-balancers-62a6f8592bcf
 resource "aws_alb" "webapp_alb" {
   name = "${var.environment_tag}-alb"
-  internal = false
+  internal = "${var.internal_alb}"
   load_balancer_type = "application"
-  security_groups = 
-  subnets = 
+  security_groups = ["${aws_security_group.webapp_https_inbound_sg.id}"]  
+  subnets = ["${aws_subnet.public.*.id}"]
+  tags = "${merge(var.tags, map("Name", format("%s-alb", var.name)))}"
 }
 
 resource "aws_autoscaling_group" "asg" {
@@ -67,7 +68,7 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
   vpc_security_group_ids = ["${aws_security_group.bastion_rdp_sg.id}"]
   key_name = "${var.key_name}"
-  tags = "${var.environment_tag}-bastion"
+  tags = "${merge(var.tags, map("Name", format("%s-bastion", var.name)))}"
 }
 
 resource "aws_eip" "bastion"{

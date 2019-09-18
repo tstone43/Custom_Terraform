@@ -45,25 +45,7 @@ resource "aws_security_group" "webapp_https_inbound_sg" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags {
-    Name = "${var.environment_tag}_webapp_https_inbound"
-  }
-}
-
-resource "aws_security_group" "webapp_rdp_inbound_sg" {
-  name        = "demo_webapp_ssh_inbound"
-  description = "Allow SSH from certain ranges"
-
-  ingress {
-    from_port   = 3389
-    to_port     = 3389
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  vpc_id = "${data.terraform_remote_state.networking.vpc_id}"
-
-  tags {
-    Name = "terraform_demo_webapp_ssh_inbound"
+    Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound", var.name)))}"
   }
 }
 
