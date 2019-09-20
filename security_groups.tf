@@ -49,6 +49,31 @@ resource "aws_security_group" "webapp_https_inbound_sg" {
   }
 }
 
+resource "aws_security_group" "webapp_https_inbound_sg_private" {
+  name        = "${var.environment_tag}_webapp_https_inbound_private"
+  description = "Allow HTTPS from Public to Private"
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["${var.network_address_space}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags {
+    Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound_private", var.name)))}"
+  }
+}
+
 resource "aws_security_group" "webapp_outbound_sg" {
   name        = "demo_webapp_outbound"
   description = "Allow outbound connections"

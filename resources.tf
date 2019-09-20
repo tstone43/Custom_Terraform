@@ -36,6 +36,7 @@ resource "aws_launch_configuration" "web-svr-launch" {
   placement_tenancy = "default"
   key_name = "${var.key_name}"
   associate_public_ip_address = false
+  security_groups = ["${aws_security_group.webapp_https_inbound_sg_private}"]
   lifecycle {
     create_before_destroy = true
   }
@@ -55,6 +56,15 @@ resource "aws_autoscaling_group" "asg" {
   launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
   min_size             = 1
   max_size             = 2
+  wait_for_elb_capacity = false
+  force_delete          = true
+  load_balancers = "${aws_alb.webapp_alb}"
+  tags = ["${
+    list (
+      map("key", "Name", "value", "ddt_webapp_asg", "propagate_at_launch", true)
+    )
+
+  }"]
 
   lifecycle {
     create_before_destroy = true
