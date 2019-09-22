@@ -54,11 +54,12 @@ resource "aws_alb" "webapp_alb" {
 resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
   launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
+  vpc_zone_identifier = ["${split(",",var.private_subnets)}"]
   min_size             = 1
   max_size             = 2
   wait_for_elb_capacity = false
   force_delete          = true
-  load_balancers = "${aws_alb.webapp_alb}"
+  load_balancers = "${aws_alb.webapp_alb.name}"
   tags = ["${
     list (
       map("key", "Name", "value", "ddt_webapp_asg", "propagate_at_launch", true)
@@ -70,6 +71,61 @@ resource "aws_autoscaling_group" "asg" {
     create_before_destroy = true
   }
 }
+
+resource "aws_autoscaling_policy" "scale_up" {
+  name = "${var.environment_tag}-asg_scale_up"
+  scaling_adjustment = 1
+  adjustment_type = "ChangeInCapacity"
+  cooldown = 300
+  autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+}
+
+resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
+  alarm_name = "${var.environment_tag}-high-asg-cpu"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods = "2"
+  metric_name = "CPUUtilization"
+  namespace = "AWS/EC2"
+  period = "120"
+  statistic = "Average"
+  threshold = "80"
+  insufficient_data_actions = []
+
+  dimensions {
+    autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+  }
+
+  alarm_description = "EC2 CPU Utilization"
+  alarm_actions = ["${aws_autoscaling_policy.scale_up.arn}"]
+}
+
+resource "aws_autoscaling_policy" "scale_down" {
+  name = "${var.environment_tag}-low-asg-cpu"
+  scaling_adjustment = -1
+  adjustment_type = "ChangeInCapacity"
+  cooldown = 600
+  autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+}
+
+resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
+  alarm_name = "${var.environment_tag}-low-asg-cpu"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods = "5"
+  metric_name = "CPUUtlizaiton"
+  namespace = "AWS/EC2"
+  period = "120"
+  statistic = "Average"
+  threshold = "30"
+  insufficient_data_actions = []
+
+  dimensions {
+    autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+  }
+
+  alarm_description = "EC2 CPU Utilization"
+  alarm_actions = ["${aws_autoscaling_policy.scale_down.arn}"]
+}
+
 # Reference is deep dive terraform folder 6
 resource "aws_instance" "bastion" {
   ami = "${data.aws_ami.windows.id}"
