@@ -7,7 +7,7 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
-  source = "./Modules/VPC"
+  source = ".\\Modules\\VPC"
   name = "${var.environment_tag}"
   cidr = "${var.network_address_space}"
   azs = "${slice(data.aws_availability_zones.available.names,0,var.subnet_count)}"

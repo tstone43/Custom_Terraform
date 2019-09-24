@@ -17,9 +17,9 @@ resource "aws_security_group" "bastion_rdp_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = module.vpc.vpc_id
 
-  tags {
+  tags = {
     Name = "terraform_bastion_rdp"
   }
 }
@@ -42,9 +42,9 @@ resource "aws_security_group" "webapp_https_inbound_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = module.vpc.vpc_id
 
-  tags {
+  tags = {
     Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound", var.name)))}"
   }
 }
@@ -67,9 +67,9 @@ resource "aws_security_group" "webapp_https_inbound_sg_private" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = module.vpc.vpc_id
 
-  tags {
+  tags = {
     Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound_private", var.name)))}"
   }
 }
@@ -85,9 +85,9 @@ resource "aws_security_group" "webapp_outbound_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = module.vpc.vpc_id
 
-  tags {
+  tags = {
     Name = "${merge(var.tags, map("Name", format("%s-outbound", var.name)))}"
   }
 }
