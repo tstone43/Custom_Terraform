@@ -45,7 +45,7 @@ resource "aws_security_group" "webapp_https_inbound_sg" {
   vpc_id = module.vpc.vpc_id
 
   tags = {
-    Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound", var.name)))}"
+    "Name" = "${var.environment_tag}-web_https_inbound"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_security_group" "webapp_https_inbound_sg_private" {
   vpc_id = module.vpc.vpc_id
 
   tags = {
-    Name = "${merge(var.tags, map("Name", format("%s-web_https_inbound_private", var.name)))}"
+    "Name" = "${var.environment_tag}-web_https_inbound_private"
   }
 }
 
@@ -88,7 +88,7 @@ resource "aws_security_group" "webapp_outbound_sg" {
   vpc_id = module.vpc.vpc_id
 
   tags = {
-    Name = "${merge(var.tags, map("Name", format("%s-outbound", var.name)))}"
+    "Name" = "${var.environment_tag}-outbound"
   }
 }
 

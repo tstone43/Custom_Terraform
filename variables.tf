@@ -2,7 +2,10 @@ variable "aws_access_key" {}
 
 variable "aws_secret_key" {}
 
-variable "environment_tag" {}
+variable "environment_tag" {
+  type = "string"
+  default = "test"
+}
 
 variable "subnet_count" {
   default = 2
@@ -19,3 +22,12 @@ variable "internal_alb" {
 variable "alb_listener_port" {}
 
 variable "alb_listener_protocol" {}
+
+variable "key_name" {
+  default = "tcs-kp"
+}
+
+variable "first_public_subnet" {
+  type = "string"
+  default = "module.vpc.public_subnets"
+}

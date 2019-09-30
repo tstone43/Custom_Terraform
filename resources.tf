@@ -7,7 +7,7 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
-  source = ".\\Modules\\VPC"
+  source = "./Modules/VPC"
   name = "${var.environment_tag}"
   cidr = "${var.network_address_space}"
   azs = "${slice(data.aws_availability_zones.available.names,0,var.subnet_count)}"
@@ -47,31 +47,27 @@ resource "aws_alb" "webapp_alb" {
   internal = "${var.internal_alb}"
   load_balancer_type = "application"
   security_groups = ["${aws_security_group.webapp_https_inbound_sg.id}"]  
-  subnets = ["${aws_subnet.public.*.id}"]
-  tags = "${merge(var.tags, map("Name", format("%s-alb", var.name)))}"
+  subnets = flatten([module.vpc.public_subnets])
+  tags = {
+    "Name" = "${var.environment_tag}-alb"
+  }
 }
 
 resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
   launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
-  vpc_zone_identifier = ["${split(",",var.private_subnets)}"]
+  vpc_zone_identifier = module.vpc.private_subnets
   min_size             = 1
   max_size             = 2
-  wait_for_elb_capacity = false
   force_delete          = true
   load_balancers = "${aws_alb.webapp_alb.name}"
-  tags = ["${
-    list (
-      map("key", "Name", "value", "ddt_webapp_asg", "propagate_at_launch", true)
-    )
-
-  }"]
-
-  lifecycle {
-    create_before_destroy = true
+  tag {
+    key = "Name"
+    value = "webapp_asg"
+    propagate_at_launch = true
   }
-}
-
+} 
+  
 resource "aws_autoscaling_policy" "scale_up" {
   name = "${var.environment_tag}-asg_scale_up"
   scaling_adjustment = 1
@@ -91,7 +87,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   threshold = "80"
   insufficient_data_actions = []
 
-  dimensions {
+  dimensions = {
     autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
   }
 
@@ -118,7 +114,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   threshold = "30"
   insufficient_data_actions = []
 
-  dimensions {
+  dimensions = {
     autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
   }
 
@@ -130,11 +126,14 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
 resource "aws_instance" "bastion" {
   ami = "${data.aws_ami.windows.id}"
   instance_type = "t2.micro"
-  subnet_id = "${element(aws_subnet.public.*.subnet_id,0)}"
+  #subnet_id = "${element(module.vpc.public_subnets, 0)}"
+  subnet_id = "${var.first_public_subnet}[0]"
   associate_public_ip_address = true
   vpc_security_group_ids = ["${aws_security_group.bastion_rdp_sg.id}"]
   key_name = "${var.key_name}"
-  tags = "${merge(var.tags, map("Name", format("%s-bastion", var.name)))}"
+  tags = {
+    "Name" = "${var.environment_tag}-bastion"
+  }
 }
 
 resource "aws_eip" "bastion"{
