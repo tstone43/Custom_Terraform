@@ -7,7 +7,7 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
-  source = "./Modules/VPC"
+  source = ".\\Modules\\VPC"
   name = "${var.environment_tag}"
   cidr = "${var.network_address_space}"
   azs = "${slice(data.aws_availability_zones.available.names,0,var.subnet_count)}"
@@ -36,7 +36,7 @@ resource "aws_launch_configuration" "web-svr-launch" {
   placement_tenancy = "default"
   key_name = "${var.key_name}"
   associate_public_ip_address = false
-  security_groups = ["${aws_security_group.webapp_https_inbound_sg_private}"]
+  security_groups = ["${aws_security_group.webapp_https_inbound_sg_private.id}"]
   lifecycle {
     create_before_destroy = true
   }
@@ -52,11 +52,11 @@ resource "aws_alb" "webapp_alb" {
     "Name" = "${var.environment_tag}-alb"
   }
 }
-
+# In config below load_balancers has to use target group ARN
 resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
   launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
-  vpc_zone_identifier = module.vpc.private_subnets
+  vpc_zone_identifier = flatten(module.vpc.private_subnets)
   min_size             = 1
   max_size             = 2
   force_delete          = true
