@@ -52,6 +52,43 @@ resource "aws_alb" "webapp_alb" {
     "Name" = "${var.environment_tag}-alb"
   }
 }
+
+resource "aws_alb_listener" "alb_listener" {
+  load_balancer_arn = "${aws_alb.webapp_alb.arn}"
+  port = "${var.alb_listener_port}"
+  protocol = "${var.alb_listener_protocol}"
+
+  default_action {
+    target_group_arn = "${aws_alb_target_group.alb_target.arn}"
+    type = "forward"
+  }
+}
+
+resource "aws_alb_listener_rule" "listener_rule" {
+  depends_on = ["aws_alb_target_group.alb_target_group"]
+  listener_arn = "${aws_alb_listener.alb_listener.arn}"
+  
+  action {
+    type = "forward"
+    target_group_arn = "${aws_alb_target_group.alb_target_group.id}"
+  }
+  
+  condition {
+    field = "path-pattern"
+    values = ["*"]
+  }
+}
+
+resource "aws_alb_target_group" "alb_target_group" {
+  name = "${var.environment_tag}-target-group"
+  port = "${var.alb_listener_port}"
+  protocol = "${var.alb_listener_protocol}"
+  vpc_id = module.vpc.vpc_id
+  tags {
+    name =
+  }
+}
+
 # In config below load_balancers has to use target group ARN
 resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
