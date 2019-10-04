@@ -1,7 +1,7 @@
 # Items pasted here just to provide example
 resource "aws_security_group" "bastion_rdp_sg" {
-  name        = "bastion_ssh"
-  description = "Allow SSH to Bastion host from approved ranges"
+  name        = "bastion_rdp"
+  description = "Allow RDP to Bastion host from approved ranges"
 
   ingress {
     from_port   = 3389

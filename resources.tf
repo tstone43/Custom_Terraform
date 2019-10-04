@@ -7,7 +7,7 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
-  source = ".\\Modules\\VPC"
+  source = "./Modules/VPC"
   name = "${var.environment_tag}"
   cidr = "${var.network_address_space}"
   azs = "${slice(data.aws_availability_zones.available.names,0,var.subnet_count)}"
@@ -59,7 +59,7 @@ resource "aws_alb_listener" "alb_listener" {
   protocol = "${var.alb_listener_protocol}"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group.arn}"
     type = "forward"
   }
 }
@@ -84,9 +84,16 @@ resource "aws_alb_target_group" "alb_target_group" {
   port = "${var.alb_listener_port}"
   protocol = "${var.alb_listener_protocol}"
   vpc_id = module.vpc.vpc_id
-  tags {
-    name =
+  tags = {
+    name = "${var.environment_tag}-target-group"
   }
+ health_check {
+   healthy_threshold = 3
+   unhealthy_threshold = 10
+   timeout = 5
+   interval = 10
+   port = "${var.alb_listener_port}"
+ } 
 }
 
 # In config below load_balancers has to use target group ARN
@@ -97,13 +104,17 @@ resource "aws_autoscaling_group" "asg" {
   min_size             = 1
   max_size             = 2
   force_delete          = true
-  load_balancers = "${aws_alb.webapp_alb.name}"
   tag {
     key = "Name"
     value = "webapp_asg"
     propagate_at_launch = true
   }
-} 
+}
+
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  alb_target_group_arn = "${aws_alb_target_group.alb_target_group.arn}"
+  autoscaling_group_name = "${aws_autoscaling_group.asg.id}"
+}
   
 resource "aws_autoscaling_policy" "scale_up" {
   name = "${var.environment_tag}-asg_scale_up"
