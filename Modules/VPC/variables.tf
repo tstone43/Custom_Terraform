@@ -19,7 +19,7 @@ variable "private_subnet_tags" {
 }
 
 variable "cidr" {
-    default = ""
+  description = "cidr block for VPC"
 }
 
 variable "azs" {

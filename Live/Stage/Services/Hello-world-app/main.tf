@@ -27,3 +27,9 @@ module "hello_world_app" {
   max_size           = 2
   enable_autoscaling = true
 }
+
+terraform {
+  backend "s3" {
+    key = "Live/Stage/Services/Hello-world-app/terraform.tfstate"
+  }
+}

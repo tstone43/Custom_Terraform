@@ -11,7 +11,7 @@ variable "aws_secret_key" {
 variable "bucket_name" {
   description = "The name of the S3 bucket. Must be globally unique."
   type        = string
-  default     = "thomcstone_tf_state"
+  default     = "thomcstone-tf-state"
 }
 
 variable "table_name" {
