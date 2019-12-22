@@ -7,13 +7,14 @@ data "aws_ami" "centos" {
 
   filter {
     name   = "name"
-    values = ["CentOS 7.7.1908 x86_64 with cloud-init*"]
+    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 1901*"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+   owners = ["679593333241"]
 
 }
 
@@ -27,11 +28,27 @@ resource "aws_instance" "ansible-controller" {
   tags = {
     "Name" = "${var.environment}-ansible-controller"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "yum check-update",
+      "yum update -y",
+      "sudo yum install ansible -y",
+    ]
+  }
+
+  connection {
+    type = "ssh"
+    user = "centos"
+    private_key="${file("~/.ssh/tcs-kp.pem")}"
+    host = self.public_ip
+  }
+
 }
 
 resource "aws_security_group" "private_ssh" {
   name        = "private_ssh"
-  description = "Allow RDP to Bastion host from approved ranges"
+  description = "Allow SSH to Ansible controller node from approved ranges"
 
   ingress {
     from_port   = 22
