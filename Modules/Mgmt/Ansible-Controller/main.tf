@@ -22,7 +22,7 @@ resource "aws_instance" "ansible-controller" {
   ami = "${data.aws_ami.centos.id}"
   instance_type = "t2.micro"
   subnet_id = "${element(var.subnets,0)}"
-  associate_public_ip_address = false
+  associate_public_ip_address = true
   vpc_security_group_ids = ["${aws_security_group.private_ssh.id}"]
   key_name = "${var.key_name}"
   tags = {
@@ -54,7 +54,7 @@ resource "aws_security_group" "private_ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.cidr}"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

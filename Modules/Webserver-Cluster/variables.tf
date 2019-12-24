@@ -44,11 +44,6 @@ variable "server_port" {
   default     = 443
 }
 
-variable "key_name" {
-  description = "authentication key for RDP"
-  type = string
-}
-
 variable "min_size" {
     description = "minimum number of EC2 instances to deploy"
     type = number
