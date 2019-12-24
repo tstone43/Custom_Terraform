@@ -1,21 +1,21 @@
 # Create VPC
 resource "aws_vpc" "vpc" {
-  cidr_block = "${var.cidr}"
-  instance_tenancy = "${var.instance_tenancy}"
-  enable_dns_hostnames = "${var.enable_dns_hostnames}"
-  enable_dns_support = "${var.enable_dns_support}"
-  tags = "${merge(var.tags, map("Name", format("%s", var.name)))}"
+  cidr_block = var.cidr
+  instance_tenancy = var.instance_tenancy
+  enable_dns_hostnames = var.enable_dns_hostnames
+  enable_dns_support = var.enable_dns_support
+  tags = merge(var.tags, map("Name", format("%s", var.name)))
 }
 
 # Create IGW and attach to VPC
 resource "aws_internet_gateway" "igw" {
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = aws_vpc.vpc.id
   tags = "${merge(var.tags, map("Name", format("%s-igw", var.name)))}"
 }
 
 # Create public route table on VPC
 resource "aws_route_table" "public" {
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = aws_vpc.vpc.id
   tags = "${merge(var.tags, map("Name", format("%s-rt-public", var.name)))}"
 }
 
@@ -71,7 +71,7 @@ resource "aws_nat_gateway" "natgw" {
   allocation_id = "${element(aws_eip.nateip.*.id, count.index)}"
   subnet_id = "${element(aws_subnet.public.*.id, count.index)}"
   count = "${var.enable_nat_gateway ? length(var.azs) : 0}"
-  depends_on = ["aws_internet_gateway.igw"]
+  depends_on = [aws_internet_gateway.igw]
 }
 
 # Route table associations for private subnets

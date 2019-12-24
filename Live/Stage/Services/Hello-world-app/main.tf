@@ -4,8 +4,8 @@ terraform {
 
 provider "aws" {
   region = "us-west-1"
-  access_key = "${var.aws_access_key}"
-  secret_key = "${var.aws_secret_key}"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 
   # Allow any 2.x version of the AWS provider
   version = "~> 2.0"
@@ -19,6 +19,8 @@ module "hello_world_app" {
 
   environment            = var.environment
   key_name               = var.key_name
+  private_key = var.private_key_path
+
   #db_remote_state_bucket = var.db_remote_state_bucket
   #db_remote_state_key    = var.db_remote_state_key
 

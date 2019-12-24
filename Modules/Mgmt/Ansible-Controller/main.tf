@@ -40,7 +40,7 @@ resource "aws_instance" "ansible-controller" {
   connection {
     type = "ssh"
     user = "centos"
-    private_key="${file("~/.ssh/tcs-kp.pem")}"
+    private_key="${file(var.private_key)}"
     host = self.public_ip
   }
 

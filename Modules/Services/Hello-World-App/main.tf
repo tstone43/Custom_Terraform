@@ -81,4 +81,5 @@ module "ansible_controller" {
     environment = var.environment
     key_name = var.key_name
     cidr = var.network_address_space
+    private_key = var.private_key
 }

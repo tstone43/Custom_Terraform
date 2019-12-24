@@ -4,7 +4,7 @@ terraform {
 
 resource "aws_alb" "webapp_alb" {
   name = var.alb_name
-  internal = "${var.internal_alb}"
+  internal = var.internal_alb
   load_balancer_type = "application"
   security_groups = ["${aws_security_group.webapp_https_inbound_sg.id}"]  
   subnets = var.subnets
@@ -14,10 +14,10 @@ resource "aws_alb" "webapp_alb" {
 }
 
 resource "aws_alb_listener" "alb_listener" {
-  load_balancer_arn = "${aws_alb.webapp_alb.arn}"
-  port = "${var.alb_listener_port}"
-  protocol = "${var.alb_listener_protocol}"
-  certificate_arn = "${aws_iam_server_certificate.stonezone_cert.arn}"
+  load_balancer_arn = aws_alb.webapp_alb.arn
+  port = var.alb_listener_port
+  protocol = var.alb_listener_protocol
+  certificate_arn = aws_iam_server_certificate.stonezone_cert.arn
 
   default_action {
     type = "fixed-response"

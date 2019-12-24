@@ -19,3 +19,7 @@ variable "key_name" {
 variable "cidr" {
     description = "This is used to allow CIDR in security groups"
 }
+
+variable "private_key" {
+
+}

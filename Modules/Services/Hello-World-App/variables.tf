@@ -58,3 +58,7 @@ variable "max_size" {
     description = "maximum number of EC2 instances to deploy"
     type = number
 }
+
+variable "private_key" {
+  
+}

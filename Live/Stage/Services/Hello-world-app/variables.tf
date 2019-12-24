@@ -46,3 +46,7 @@ variable "aws_secret_key" {
   description = "secret used to log into AWS"
   type = string
 }
+
+variable "private_key_path" {
+  
+}
