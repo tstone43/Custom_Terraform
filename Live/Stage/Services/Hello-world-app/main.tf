@@ -15,14 +15,9 @@ module "hello_world_app" {
 
   source = "../../../../Modules/Services/Hello-World-App"
 
-  #server_text = var.server_text
-
   environment            = var.environment
   key_name               = var.key_name
   private_key = var.private_key_path
-
-  #db_remote_state_bucket = var.db_remote_state_bucket
-  #db_remote_state_key    = var.db_remote_state_key
 
   instance_type      = "t2.micro"
   min_size           = 1
@@ -30,6 +25,7 @@ module "hello_world_app" {
   enable_autoscaling = true
 }
 
+# Partial backend configuration.  You will need a backend.hcl file to complete config.
 terraform {
   backend "s3" {
     key = "Live/Stage/Services/Hello-world-app/terraform.tfstate"

@@ -20,10 +20,10 @@ data "aws_ami" "windows" {
 
 resource "aws_launch_configuration" "web-svr-launch" {
   name_prefix   = "${var.cluster_name}-websvr"
-  image_id      = "${data.aws_ami.windows.id}"
+  image_id      = data.aws_ami.windows.id
   instance_type = var.instance_type
   placement_tenancy = "default"
-  key_name = "${var.key_name}"
+  key_name = var.key_name
   associate_public_ip_address = false
   security_groups = [
     "${aws_security_group.webapp_https_inbound_sg_private.id}",
@@ -33,10 +33,10 @@ resource "aws_launch_configuration" "web-svr-launch" {
     create_before_destroy = true
   }
 }
-# Might want to improve tag here
+
 resource "aws_autoscaling_group" "asg" {
   name                 = "websvr-asg"
-  launch_configuration = "${aws_launch_configuration.web-svr-launch.name}"
+  launch_configuration = aws_launch_configuration.web-svr-launch.name
   vpc_zone_identifier = var.vpc_zone_identifier
   min_size             = var.min_size
   max_size             = var.max_size
@@ -54,12 +54,11 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_autoscaling_policy" "scale_up" {
-  #count = var.enable_autoscaling ? 1 : 0
   name = "${var.cluster_name}-asg_scale_up"
   scaling_adjustment = 1
   adjustment_type = "ChangeInCapacity"
   cooldown = 300
-  autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
 }
 
 resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
@@ -82,13 +81,12 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   alarm_actions = ["${aws_autoscaling_policy.scale_up.arn}"]
 }
 
-resource "aws_autoscaling_policy" "scale_down" {
-  #count = var.enable_autoscaling ? 1 : 0  
+resource "aws_autoscaling_policy" "scale_down" {  
   name = "${var.cluster_name}-low-asg-cpu"
   scaling_adjustment = -1
   adjustment_type = "ChangeInCapacity"
   cooldown = 600
-  autoscaling_group_name = "${aws_autoscaling_group.asg.name}"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
 }
 
 resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
@@ -110,11 +108,6 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   alarm_description = "EC2 CPU Utilization"
   alarm_actions = ["${aws_autoscaling_policy.scale_down.arn}"]
 }
-
-#resource "aws_autoscaling_attachment" "asg_attachment" {
-  #alb_target_group_arn = module.ALB.target_group_arn
-  #autoscaling_group_name = "${aws_autoscaling_group.asg.id}"
-#}
 
 resource "aws_security_group" "private_rdp_sg" {
   name        = "private_rdp"

@@ -19,12 +19,12 @@ data "aws_ami" "centos" {
 }
 
 resource "aws_instance" "ansible-controller" {
-  ami = "${data.aws_ami.centos.id}"
+  ami = data.aws_ami.centos.id
   instance_type = "t2.micro"
-  subnet_id = "${element(var.subnets,0)}"
+  subnet_id = element(var.subnets,0)
   associate_public_ip_address = true
   vpc_security_group_ids = ["${aws_security_group.private_ssh.id}"]
-  key_name = "${var.key_name}"
+  key_name = var.key_name
   tags = {
     "Name" = "${var.environment}-ansible-controller"
   }
@@ -40,7 +40,7 @@ resource "aws_instance" "ansible-controller" {
   connection {
     type = "ssh"
     user = "centos"
-    private_key="${file(var.private_key)}"
+    private_key=file(var.private_key)
     host = self.public_ip
   }
 

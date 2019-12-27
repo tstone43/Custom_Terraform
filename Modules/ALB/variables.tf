@@ -20,5 +20,5 @@ variable "vpc_id" {
 }
 
 variable "subnets" {
-  
+  description = "public subnets will be passed through"
 }

@@ -3,7 +3,7 @@ variable "vpc_id" {
 }
 
 variable "subnets" {
-
+  description = "This will be set to a public subnet"
 }
 
 variable "environment" {
@@ -12,6 +12,6 @@ variable "environment" {
 }
 
 variable "key_name" {
-  description = "The name of the environment we're deploying to"
+  description = "key pair used to connect to host"
   type        = string
 }

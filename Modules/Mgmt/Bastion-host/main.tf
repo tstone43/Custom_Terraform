@@ -18,26 +18,20 @@ data "aws_ami" "windows" {
   owners = ["amazon"]
 }
 
-# Used to convert the public subnets to string
-#locals {
-  #str_public_subnets = flatten(module.vpc.public_subnets)
-#}
-
-# Reference is deep dive terraform folder 6
 resource "aws_instance" "bastion" {
-  ami = "${data.aws_ami.windows.id}"
+  ami = data.aws_ami.windows.id
   instance_type = "t2.micro"
-  subnet_id = "${element(var.subnets,0)}"
+  subnet_id = element(var.subnets,0)
   associate_public_ip_address = true
   vpc_security_group_ids = ["${aws_security_group.bastion_rdp_sg.id}"]
-  key_name = "${var.key_name}"
+  key_name = var.key_name
   tags = {
     "Name" = "${var.environment}-bastion"
   }
 }
 
 resource "aws_eip" "bastion"{
-  instance = "${aws_instance.bastion.id}"
+  instance = aws_instance.bastion.id
   vpc = true
 }
 

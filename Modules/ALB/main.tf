@@ -40,38 +40,6 @@ resource "aws_iam_server_certificate" "stonezone_cert" {
   }
 }
 
-#resource "aws_alb_listener_rule" "listener_rule" {
-  #depends_on = ["aws_alb_target_group.alb_target_group"]
-  #listener_arn = "${aws_alb_listener.alb_listener.arn}"
-  
-  #action {
-    #type = "forward"
-    #target_group_arn = "${aws_alb_target_group.alb_target_group.id}"
-  #}
-  
-  #condition {
-    #field = "path-pattern"
-    #values = ["*"]
-  #}
-#}
-
-#resource "aws_alb_target_group" "alb_target_group" {
-  #name = "${var.environment_tag}-target-group"
-  #port = "${var.alb_listener_port}"
-  #protocol = "${var.alb_listener_protocol}"
-  #vpc_id = module.vpc.vpc_id
-  #tags = {
-    #name = "${var.environment_tag}-target-group"
-  #}
- #health_check {
-   #healthy_threshold = 3
-   #unhealthy_threshold = 10
-   #timeout = 5
-   #interval = 10
-   #port = "${var.alb_listener_port}"
- #} 
-#}
-
 resource "aws_security_group" "webapp_https_inbound_sg" {
   name        = "${var.alb_name}_webapp_https_inbound"
   description = "Allow HTTPS from Anywhere"

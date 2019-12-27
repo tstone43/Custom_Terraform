@@ -3,7 +3,7 @@ variable "vpc_id" {
 }
 
 variable "subnets" {
-
+  descripton = "Will to set to a public subnet"
 }
 
 variable "environment" {
@@ -17,9 +17,9 @@ variable "key_name" {
 }
 
 variable "cidr" {
-    description = "This is used to allow CIDR in security groups"
+  description = "This is used to allow CIDR in security groups"
 }
 
 variable "private_key" {
-
+    description = "Used to SSH to Ansible controller"
 }
