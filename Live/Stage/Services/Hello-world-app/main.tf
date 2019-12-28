@@ -11,6 +11,10 @@ provider "aws" {
   version = "~> 2.0"
 }
 
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
 module "hello_world_app" {
 
   source = "../../../../Modules/Services/Hello-World-App"
@@ -18,6 +22,7 @@ module "hello_world_app" {
   environment            = var.environment
   key_name               = var.key_name
   private_key = var.private_key_path
+  local_public_ip = data.http.myip.body
 
   instance_type      = "t2.micro"
   min_size           = 1

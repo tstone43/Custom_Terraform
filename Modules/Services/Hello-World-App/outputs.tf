@@ -12,3 +12,13 @@ output "instance_security_group_id" {
   value       = module.Webserver-Cluster.instance_security_group_id
   description = "The ID of the EC2 Instance Security Group"
 }
+
+output "bastion_host_dns_name" {
+  value       = module.bastion_host.bastion_host_dns_name
+  description = "public DNS name for Bastion host"
+}
+
+output "ansible_controller_dns_name" {
+  value       = module.ansible_controller.ansible_controller_dns_name
+  description = "public DNS name for the Ansible controller host"
+}

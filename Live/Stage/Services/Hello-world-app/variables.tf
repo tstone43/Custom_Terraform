@@ -48,5 +48,5 @@ variable "aws_secret_key" {
 }
 
 variable "private_key_path" {
-  
+  description = "path to keypair for SSH connection"
 }

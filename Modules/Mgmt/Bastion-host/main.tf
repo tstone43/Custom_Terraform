@@ -43,7 +43,7 @@ resource "aws_security_group" "bastion_rdp_sg" {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(var.local_public_ip)}/32"]
   }
 
   egress {

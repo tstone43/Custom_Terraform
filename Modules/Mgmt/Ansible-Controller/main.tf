@@ -23,7 +23,7 @@ resource "aws_instance" "ansible-controller" {
   instance_type = "t2.micro"
   subnet_id = element(var.subnets,0)
   associate_public_ip_address = true
-  vpc_security_group_ids = ["${aws_security_group.private_ssh.id}"]
+  vpc_security_group_ids = ["${aws_security_group.public_ssh_ansible.id}"]
   key_name = var.key_name
   tags = {
     "Name" = "${var.environment}-ansible-controller"
@@ -46,15 +46,15 @@ resource "aws_instance" "ansible-controller" {
 
 }
 
-resource "aws_security_group" "private_ssh" {
-  name        = "private_ssh"
+resource "aws_security_group" "public_ssh_ansible" {
+  name        = "public_ssh_ansible"
   description = "Allow SSH to Ansible controller node from approved ranges"
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(var.local_public_ip)}/32"]
   }
 
   egress {

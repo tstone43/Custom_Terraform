@@ -71,6 +71,7 @@ module "bastion_host" {
     subnets = flatten([module.vpc.public_subnets])
     environment = var.environment
     key_name = var.key_name
+    local_public_ip = var.local_public_ip
 
 }
 
@@ -82,4 +83,5 @@ module "ansible_controller" {
     key_name = var.key_name
     cidr = var.network_address_space
     private_key = var.private_key
+    local_public_ip = var.local_public_ip
 }

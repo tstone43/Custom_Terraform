@@ -15,3 +15,8 @@ variable "key_name" {
   description = "key pair used to connect to host"
   type        = string
 }
+
+variable "local_public_ip" {
+  description = "local public IP used to secure security groups"
+  type        = string
+}

@@ -62,3 +62,7 @@ variable "max_size" {
 variable "private_key" {
   description = "necessary to SSH to the Ansible Controller"
 }
+
+variable "local_public_ip" {
+  description = "local public IP used to secure security groups"
+}
