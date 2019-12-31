@@ -2,32 +2,32 @@ terraform {
   required_version = ">= 0.12, < 0.13"
 }
 
-data "aws_ami" "windows" {
+data "aws_ami" "centos" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["Windows_Server-2016-English-Full-Base*"]
+    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 1901*"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+   owners = ["679593333241"]
 
-  owners = ["amazon"]
 }
 
 resource "aws_launch_configuration" "web-svr-launch" {
   name_prefix   = "${var.cluster_name}-websvr"
-  image_id      = data.aws_ami.windows.id
+  image_id      = data.aws_ami.centos.id
   instance_type = var.instance_type
   placement_tenancy = "default"
   key_name = var.key_name
   associate_public_ip_address = false
   security_groups = [
     "${aws_security_group.webapp_https_inbound_sg_private.id}",
-    "${aws_security_group.private_rdp_sg.id}",  
+    "${aws_security_group.private_ssh_sg.id}",  
   ]
   lifecycle {
     create_before_destroy = true
@@ -109,13 +109,13 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   alarm_actions = ["${aws_autoscaling_policy.scale_down.arn}"]
 }
 
-resource "aws_security_group" "private_rdp_sg" {
-  name        = "private_rdp"
-  description = "Allow RDP to hosts on private subnets from approved ranges"
+resource "aws_security_group" "private_ssh_sg" {
+  name        = "private_ssh"
+  description = "Allow SSH to hosts on private subnets from approved ranges"
 
   ingress {
-    from_port   = 3389
-    to_port     = 3389
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["${var.network_address_space}"]
   }
@@ -130,7 +130,7 @@ resource "aws_security_group" "private_rdp_sg" {
   vpc_id = var.vpc_id
 
   tags = {
-    Name = "${var.cluster_name}-private-rdp"
+    Name = "${var.cluster_name}-private-ssh"
   }
 }
 

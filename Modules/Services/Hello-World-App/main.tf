@@ -78,10 +78,9 @@ module "bastion_host" {
 module "ansible_controller" {
     source = "../../Mgmt/Ansible-Controller"
     vpc_id = "${module.vpc.vpc_id}"
-    subnets = flatten([module.vpc.public_subnets])
+    subnets = flatten([module.vpc.private_subnets])
     environment = var.environment
     key_name = var.key_name
     cidr = var.network_address_space
     private_key = var.private_key
-    local_public_ip = var.local_public_ip
 }

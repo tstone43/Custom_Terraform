@@ -2,28 +2,28 @@ terraform {
   required_version = ">= 0.12, < 0.13"
 }
 
-data "aws_ami" "windows" {
+data "aws_ami" "centos" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["Windows_Server-2016-English-Full-Base*"]
+    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 1901*"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+   owners = ["679593333241"]
 
-  owners = ["amazon"]
 }
 
 resource "aws_instance" "bastion" {
-  ami = data.aws_ami.windows.id
+  ami = data.aws_ami.centos.id
   instance_type = "t2.micro"
   subnet_id = element(var.subnets,0)
   associate_public_ip_address = true
-  vpc_security_group_ids = ["${aws_security_group.bastion_rdp_sg.id}"]
+  vpc_security_group_ids = ["${aws_security_group.bastion_ssh_sg.id}"]
   key_name = var.key_name
   tags = {
     "Name" = "${var.environment}-bastion"
@@ -35,13 +35,13 @@ resource "aws_eip" "bastion"{
   vpc = true
 }
 
-resource "aws_security_group" "bastion_rdp_sg" {
-  name        = "bastion_rdp"
-  description = "Allow RDP to Bastion host from approved ranges"
+resource "aws_security_group" "bastion_ssh_sg" {
+  name        = "bastion_ssh"
+  description = "Allow SSH to Bastion host from approved ranges"
 
   ingress {
-    from_port   = 3389
-    to_port     = 3389
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["${chomp(var.local_public_ip)}/32"]
   }
@@ -56,6 +56,6 @@ resource "aws_security_group" "bastion_rdp_sg" {
   vpc_id = var.vpc_id
 
   tags = {
-    Name = "${var.environment}-bastion-rdp"
+    Name = "${var.environment}-bastion-ssh"
   }
 }

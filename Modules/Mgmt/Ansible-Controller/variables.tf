@@ -23,7 +23,3 @@ variable "cidr" {
 variable "private_key" {
   description = "Used to SSH to Ansible controller"
 }
-
-variable "local_public_ip" {
-  type        = string
-}

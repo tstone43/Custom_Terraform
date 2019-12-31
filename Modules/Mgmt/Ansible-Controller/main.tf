@@ -22,39 +22,24 @@ resource "aws_instance" "ansible-controller" {
   ami = data.aws_ami.centos.id
   instance_type = "t2.micro"
   subnet_id = element(var.subnets,0)
-  associate_public_ip_address = true
-  vpc_security_group_ids = ["${aws_security_group.public_ssh_ansible.id}"]
+  associate_public_ip_address = false
+  vpc_security_group_ids = ["${aws_security_group.private_ssh_ansible.id}"]
   key_name = var.key_name
+  user_data = file("${path.module}/install_ansible.sh")
   tags = {
     "Name" = "${var.environment}-ansible-controller"
   }
-
-  provisioner "remote-exec" {
-    inline = [
-      "yum check-update",
-      "yum update -y",
-      "sudo yum install ansible -y",
-    ]
-  }
-
-  connection {
-    type = "ssh"
-    user = "centos"
-    private_key=file(var.private_key)
-    host = self.public_ip
-  }
-
 }
 
-resource "aws_security_group" "public_ssh_ansible" {
-  name        = "public_ssh_ansible"
+resource "aws_security_group" "private_ssh_ansible" {
+  name        = "private_ssh_ansible"
   description = "Allow SSH to Ansible controller node from approved ranges"
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(var.local_public_ip)}/32"]
+    cidr_blocks = [var.cidr]
   }
 
   egress {

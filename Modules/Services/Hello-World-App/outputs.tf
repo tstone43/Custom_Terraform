@@ -17,8 +17,3 @@ output "bastion_host_dns_name" {
   value       = module.bastion_host.bastion_host_dns_name
   description = "public DNS name for Bastion host"
 }
-
-output "ansible_controller_dns_name" {
-  value       = module.ansible_controller.ansible_controller_dns_name
-  description = "public DNS name for the Ansible controller host"
-}
